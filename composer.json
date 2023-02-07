@@ -1,0 +1,14 @@
+{
+    "config": {
+        "platform": {
+            "php": "7.4.0"
+        }
+    },
+    "require": {
+        "slim/slim": "4.*",
+        "slim/psr7": "^1.1",
+        "sendgrid/sendgrid": "~7",
+        "google/apiclient": "^2.7",
+        "sendinblue/api-v3-sdk": "7.x.x"
+    }
+}
