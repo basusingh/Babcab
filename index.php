@@ -24,20 +24,22 @@ $errorMiddleware = $app->addErrorMiddleware($displayErrorDetails, true, true);
 //$maintenanceMiddle = new MaintenanceMiddleware();
 //$app->add($maintenanceMiddle);
 
-$app->post('/user/register/donor', function (Request $request, Response $response, $args) {
+$app->post('/user/register', function (Request $request, Response $response, $args) {
     $db = new DbOperation();
     $body = $request->getBody();
     $data = json_decode($body->getContents(), true);
-    $empty = verifyEmptyParams(array($data['nameOfPerson'], $data['donorType'], $data['nameOfDonor'], $data['email'], $data['phone'], $data['address'], $data['pincode'], $data['city'], $data['state'], $data['country'], $data['isVolunteer'], $data['distance'], $data['device']));
+    $empty = verifyEmptyParams(array($data['fName'], $data['lName'], $data['phoneNumber'], $data['email'], $data['college'], $data['graduationYear'], $data['userType'], $data['streetAddress'], $data['city'], $data['state'], $data['country'], $data['pincode'], $data['password'], $data['device'], $data['firebaseToken']));
     if($empty){
         $message["error"] = true;
         $message["message"] = "Parameters missing or empty";
-        $message["code"] = "X104-Register-Donor";
+        $message["code"] = "X104-Register";
 
         $response->getBody()->write(json_encode($message));
         return $response;
     }
-    
+
+    //Token to verify mobile number
+    /**
     $token = $data['firebaseToken'];
     $cr = new CurlRequest();
     $userFound = $cr->verifyMobileTokenWithFirebase($token, $data['phone']);
@@ -49,25 +51,27 @@ $app->post('/user/register/donor', function (Request $request, Response $respons
         $response->getBody()->write(json_encode($message));
         return $response;
     }
-    
-    $res = $db->registerDonor($data['nameOfPerson'], $data['donorType'], $data['nameOfDonor'], $data['email'], $data['phone'], $data['address'], $data['pincode'], $data['city'], $data['state'], $data['country'], $data['isVolunteer'], $data['distance'], $data['device'], getClientIP());
+    **/
+    $res = $db->registerUser($data['fName'], $data['lName'], $data['phoneNumber'], $data['email'], $data['college'], $data['graduationYear'], $data['userType'], $data['streetAddress'], $data['city'], $data['state'], $data['country'], $data['pincode'], $data['password'], $data['device'], $data['firebaseToken'], getClientIP());
+
+    //$res = $db->registerDonor($data['nameOfPerson'], $data['donorType'], $data['nameOfDonor'], $data['email'], $data['phone'], $data['address'], $data['pincode'], $data['city'], $data['state'], $data['country'], $data['isVolunteer'], $data['distance'], $data['device'], getClientIP());
 
     if($res == 0){
         $message["error"] = true;
         $message["message"] = "An error occurred while registering. Please try again later.";
-        $message["code"] = "X101-Register-Donor";
+        $message["code"] = "X101-Register";
     } else if($res == 1){
         $message["error"] = true;
         $message["message"] = "An error occurred while registering. Please try again later.";
-        $message["code"] = "X102-Register-Donor";
+        $message["code"] = "X102-Register";
     } else if($res == 2){
         $message["error"] = true;
         $message["message"] = "An error occurred while registering. Please try again later.";
-        $message["code"] = "X103-Register-Donor";
+        $message["code"] = "X103-Register";
     } else if($res == 3){
         $message["error"] = true;
         $message["message"] = "An error occurred while registering. Please try again later.";
-        $message["code"] = "X104-Register-Donor";
+        $message["code"] = "X104-Register";
     } else {
         $message["error"] = false;
         $message["message"] = $res;
@@ -75,120 +79,13 @@ $app->post('/user/register/donor', function (Request $request, Response $respons
     $response->getBody()->write(json_encode($message));
     return $response;
 });
-
-$app->post('/user/register/volunteer', function (Request $request, Response $response, $args) {
-    $db = new DbOperation();
-    $body = $request->getBody();
-    $data = json_decode($body->getContents(), true);
-
-    $empty = verifyEmptyParams(array($data['nameOfPerson'], $data['email'], $data['phone'], $data['address'], $data['pincode'], $data['city'], $data['state'], $data['country'], $data['distance'], $data['device']));
-    if($empty){
-        $message["error"] = true;
-        $message["message"] = "Parameters missing or empty";
-        $message["code"] = "X104-Register-Volunteer";
-
-        $response->getBody()->write(json_encode($message));
-        return $response;
-    }
-    
-    $token = $data['firebaseToken'];
-    $cr = new CurlRequest();
-    $userFound = $cr->verifyMobileTokenWithFirebase($token, $data['phone']);
-    if(!$userFound){
-        $message["error"] = true;
-        $message["message"] = "Invalid credentials found. Please try again.";
-        $message["code"] = "X105-Register-Volunteer";
-
-        $response->getBody()->write(json_encode($message));
-        return $response;
-    }
-
-    $res = $db->registerVolunteer($data['nameOfPerson'], $data['email'], $data['phone'], $data['address'], $data['pincode'], $data['city'], $data['state'], $data['country'], $data['distance'], $data['device'], getClientIP());
-
-    if($res == 0){
-        $message["error"] = true;
-        $message["message"] = "An error occurred while registering. Please try again later.";
-        $message["code"] = "X101-Register-Volunteer";
-    } else if($res == 1){
-        $message["error"] = true;
-        $message["message"] = "An error occurred while registering. Please try again later.";
-        $message["code"] = "X102-Register-Volunteer";
-    } else if($res == 2){
-        $message["error"] = true;
-        $message["message"] = "An error occurred while registering. Please try again later.";
-        $message["code"] = "X103-Register-Volunteer";
-    } else if($res == 3){
-        $message["error"] = true;
-        $message["message"] = "An error occurred while registering. Please try again later.";
-        $message["code"] = "X104-Register-Volunteer";
-    } else {
-        $message["error"] = false;
-        $message["message"] = $res;
-    }
-    $response->getBody()->write(json_encode($message));
-    return $response;
-});
-
-$app->post('/user/register/recipient', function (Request $request, Response $response, $args) {
-    $db = new DbOperation();
-    $body = $request->getBody();
-    $data = json_decode($body->getContents(), true);
-
-    $empty = verifyEmptyParams(array($data['nameOfPerson'], $data['recipientType'], $data['nameOfRecipient'], $data['email'], $data['phone'], $data['address'], $data['pincode'], $data['city'], $data['state'], $data['country'], $data['isVolunteer'], $data['distance'], $data['device']));
-    if($empty){
-        $message["error"] = true;
-        $message["message"] = "Parameters missing or empty";
-        $message["code"] = "X104-Register-Recipient";
-
-        $response->getBody()->write(json_encode($message));
-        return $response;
-    }
-    
-    $token = $data['firebaseToken'];
-    $cr = new CurlRequest();
-    $userFound = $cr->verifyMobileTokenWithFirebase($token, $data['phone']);
-    if(!$userFound){
-        $message["error"] = true;
-        $message["message"] = "Invalid credentials found. Please try again.";
-        $message["code"] = "X105-Register-Recipient";
-
-        $response->getBody()->write(json_encode($message));
-        return $response;
-    }
-
-    $res = $db->registerRecipient($data['nameOfPerson'], $data['recipientType'], $data['nameOfRecipient'], $data['email'], $data['phone'], $data['address'], $data['pincode'], $data['city'], $data['state'], $data['country'], $data['isVolunteer'], $data['distance'], $data['device'], getClientIP());
-
-    if($res == 0){
-        $message["error"] = true;
-        $message["message"] = "An error occurred while registering. Please try again later.";
-        $message["code"] = "X101-Register-Recipient";
-    } else if($res == 1){
-        $message["error"] = true;
-        $message["message"] = "An error occurred while registering. Please try again later.";
-        $message["code"] = "X102-Register-Recipient";
-    } else if($res == 2){
-        $message["error"] = true;
-        $message["message"] = "An error occurred while registering. Please try again later.";
-        $message["code"] = "X103-Register-Recipient";
-    } else if($res == 3){
-        $message["error"] = true;
-        $message["message"] = "An error occurred while registering. Please try again later.";
-        $message["code"] = "X104-Register-Recipient";
-    } else {
-        $message["error"] = false;
-        $message["message"] = $res;
-    }
-    $response->getBody()->write(json_encode($message));
-    return $response;
-});
-
 
 $app->post('/user/check-user', function (Request $request, Response $response, $args) {
     $db = new DbOperation();
     $body = $request->getBody();
     $data = json_decode($body->getContents(), true);
 
-    $empty = verifyEmptyParams(array($data['email'], $data['phone'], $data['type']));
+    $empty = verifyEmptyParams(array($data['email'], $data['phoneNumber'], $data['type']));
     if($empty){
         $message["error"] = true;
         $message["message"] = "Parameters missing or empty";
@@ -198,7 +95,7 @@ $app->post('/user/check-user', function (Request $request, Response $response, $
         return $response;
     }
 
-    $res = $db->checkIfUserExists($data['email'], $data['phone']);
+    $res = $db->checkIfUserExists($data['email'], $data['phoneNumber']);
     $message["error"] = false;
     $message["exist"] = $res;
     if($res){
@@ -215,6 +112,10 @@ $app->post('/user/check-user', function (Request $request, Response $response, $
 });
 
 
+
+
+
+//TODO
 $app->post('/user/login-mobile', function (Request $request, Response $response, $args) {
     $db = new DbOperation();
     $body = $request->getBody();

@@ -35,6 +35,8 @@ class DbOperation
     }
 
 
+    //TODO
+    //Register User
     public function registerDonor($nameOfPerson, $donorType, $nameOfDonor, $email, $phone, $address, $pincode, $city, $state, $country, $isVolunteer, $distance, $device, $ipaddress){
         $timestamp = $this->getCurrentTimeStamp();
         $api_key = $this->generateApiKey();
